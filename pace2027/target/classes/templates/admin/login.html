@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login — PACE 2027</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      position: relative;
+      z-index: 1;
+    }
+    .login-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 52px 44px;
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      overflow: hidden;
+    }
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), transparent);
+    }
+    .login-logo {
+      font-family: var(--font-display);
+      font-size: 3.2rem;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .login-logo span { color: var(--text-primary); }
+    .login-subtitle {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 40px;
+    }
+    .login-form .form-group { margin-bottom: 18px; }
+    .alert-error {
+      background: rgba(232, 64, 64, 0.1);
+      border: 1px solid var(--red);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      color: var(--red);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+    .alert-success {
+      background: rgba(61, 214, 140, 0.1);
+      border: 1px solid var(--green);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      color: var(--green);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      margin-bottom: 20px;
+    }
+    .login-btn { width: 100%; justify-content: center; padding: 16px; font-size: 0.82rem; margin-top: 8px; }
+    .login-back {
+      display: block;
+      text-align: center;
+      margin-top: 20px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-decoration: none;
+      transition: color var(--transition);
+    }
+    .login-back:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+<div class="login-page">
+  <div class="login-card">
+    <div class="login-logo">PACE<span> 2027</span></div>
+    <p class="login-subtitle">Organiser Access Only</p>
+
+    <div th:if="${param.error}" class="alert-error">
+      ⚠ Invalid credentials. Please try again.
+    </div>
+    <div th:if="${param.logout}" class="alert-success">
+      ✓ You have been logged out successfully.
+    </div>
+
+    <form th:action="@{/admin/login}" method="post" class="login-form">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username"
+               placeholder="Admin username" autocomplete="username" required>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"
+               placeholder="••••••••••" autocomplete="current-password" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary login-btn">
+        Login to Dashboard →
+      </button>
+    </form>
+
+    <a href="/" class="login-back">← Back to Public Site</a>
+  </div>
+</div>
+</body>
+</html>

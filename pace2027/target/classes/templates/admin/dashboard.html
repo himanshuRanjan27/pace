@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+                xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — PACE 2027</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .admin-layout {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      padding: 28px 0;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-brand { padding: 0 24px 28px; border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+    .sidebar-brand-name { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.08em; color: var(--accent); }
+    .sidebar-brand-name span { color: var(--text-primary); }
+    .sidebar-role { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-dim); margin-top: 4px; }
+    .sidebar-section-label { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-dim); padding: 0 24px; margin-bottom: 8px; margin-top: 16px; }
+    .sport-nav-btn {
+      display: flex; align-items: center; justify-content: space-between;
+      width: 100%; padding: 11px 24px;
+      background: transparent; border: none;
+      color: var(--text-muted); font-family: var(--font-body); font-size: 0.98rem;
+      cursor: pointer; text-align: left;
+      transition: all var(--transition);
+      border-left: 3px solid transparent;
+    }
+    .sport-nav-btn:hover { background: var(--accent-glow); color: var(--text-primary); border-left-color: var(--accent); }
+    .sport-nav-btn.active { background: var(--accent-glow); color: var(--accent); border-left-color: var(--accent); font-weight: 600; }
+    .sport-nav-badge { font-family: var(--font-mono); font-size: 0.62rem; background: var(--accent); color: var(--bg-primary); padding: 2px 7px; border-radius: 100px; font-weight: 600; }
+    .sidebar-footer { margin-top: auto; padding: 20px 24px 0; border-top: 1px solid var(--border); }
+    .logout-btn {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; padding: 10px 16px;
+      background: transparent; border: 1px solid var(--border); border-radius: var(--radius);
+      color: var(--text-muted); font-family: var(--font-mono); font-size: 0.7rem;
+      letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; text-decoration: none;
+      transition: all var(--transition);
+    }
+    .logout-btn:hover { border-color: var(--red); color: var(--red); background: rgba(232,64,64,0.08); }
+    .admin-main { padding: 36px clamp(24px, 4vw, 52px); overflow-y: auto; }
+    .admin-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 36px; }
+    .admin-title { font-family: var(--font-display); font-size: clamp(2.4rem, 4vw, 3.6rem); letter-spacing: 0.04em; line-height: 0.95; color: var(--text-primary); }
+    .admin-title span { color: var(--accent); }
+    .admin-subtitle { color: var(--text-muted); font-style: italic; font-size: 0.95rem; margin-top: 6px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 32px; }
+    .summary-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; }
+    .summary-card-label { font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .summary-card-value { font-family: var(--font-display); font-size: 2.4rem; letter-spacing: 0.06em; line-height: 1; color: var(--text-primary); }
+    .summary-card-value.accent { color: var(--accent); }
+    .summary-card-value.green  { color: var(--green);  }
+    .toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+    .toolbar-left { display: flex; gap: 8px; flex-wrap: wrap; }
+    .filter-tab { padding: 8px 18px; border-radius: 100px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all var(--transition); }
+    .filter-tab:hover, .filter-tab.active { background: var(--accent); border-color: var(--accent); color: var(--bg-primary); }
+    .export-btn { display: flex; align-items: center; gap: 6px; padding: 9px 20px; border-radius: var(--radius); background: var(--bg-elevated); border: 1px solid var(--border); color: var(--text-muted); font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; transition: all var(--transition); text-decoration: none; }
+    .export-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .table-wrapper { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: var(--bg-elevated); border-bottom: 1px solid var(--border); }
+    th { padding: 13px 16px; text-align: left; font-family: var(--font-mono); font-size: 0.62rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-dim); white-space: nowrap; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background var(--transition); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--bg-elevated); }
+    td { padding: 14px 16px; font-size: 0.92rem; color: var(--text-primary); vertical-align: middle; }
+    .td-mono { font-family: var(--font-mono); font-size: 0.78rem; color: var(--text-muted); letter-spacing: 0.06em; }
+    .td-team { font-weight: 600; }
+    .td-utr { font-family: var(--font-mono); font-size: 0.8rem; background: var(--bg-elevated); padding: 4px 10px; border-radius: 4px; border: 1px solid var(--border); letter-spacing: 0.08em; color: var(--accent); }
+    .action-btns { display: flex; gap: 8px; }
+    .approve-btn, .reject-btn { padding: 7px 14px; border-radius: var(--radius); border: none; font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; transition: all var(--transition); white-space: nowrap; }
+    .approve-btn { background: rgba(61,214,140,0.12); color: var(--green); border: 1px solid rgba(61,214,140,0.3); }
+    .approve-btn:hover { background: var(--green); color: var(--bg-primary); transform: scale(1.04); }
+    .reject-btn { background: rgba(232,64,64,0.1); color: var(--red); border: 1px solid rgba(232,64,64,0.25); }
+    .reject-btn:hover { background: var(--red); color: white; transform: scale(1.04); }
+    .action-done { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.1em; color: var(--text-dim); }
+    .table-empty { padding: 60px 20px; text-align: center; color: var(--text-muted); font-style: italic; }
+    .toast { position: fixed; bottom: 28px; right: 28px; padding: 14px 22px; border-radius: var(--radius); font-family: var(--font-mono); font-size: 0.75rem; letter-spacing: 0.1em; z-index: 9999; transform: translateY(80px); opacity: 0; transition: all 0.3s ease; max-width: 340px; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.toast-success { background: var(--green); color: var(--bg-primary); }
+    .toast.toast-error   { background: var(--red);   color: white; }
+    .toast.toast-info    { background: var(--accent); color: var(--bg-primary); }
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(6px); z-index: 500; display: flex; align-items: center; justify-content: center; opacity: 0; visibility: hidden; transition: all 0.25s; }
+    .confirm-overlay.active { opacity: 1; visibility: visible; }
+    .confirm-box { background: var(--bg-card); border: 1px solid var(--border-bright); border-radius: 12px; padding: 36px; max-width: 400px; width: 90%; text-align: center; transform: scale(0.92); transition: transform 0.25s; }
+    .confirm-overlay.active .confirm-box { transform: scale(1); }
+    .confirm-title { font-family: var(--font-display); font-size: 2rem; letter-spacing: 0.05em; margin-bottom: 10px; }
+    .confirm-body { color: var(--text-muted); font-size: 0.95rem; font-style: italic; margin-bottom: 28px; line-height: 1.6; }
+    .confirm-actions { display: flex; gap: 12px; justify-content: center; }
+    @media (max-width: 900px) {
+      .admin-layout { grid-template-columns: 1fr; }
+      .sidebar { display: none; }
+      .summary-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="admin-layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-name">PACE<span> 2027</span></div>
+      <div class="sidebar-role">Admin Dashboard</div>
+    </div>
+
+    <p class="sidebar-section-label">Sports</p>
+
+    <button class="sport-nav-btn active"
+            onclick="selectSport(null, 'All Sports', this)">
+      All Sports
+    </button>
+
+    <th:block th:each="sport : ${sports}">
+      <button class="sport-nav-btn"
+              th:onclick="|selectSport(${sport.id}, '${sport.name}', this)|"
+              th:data-sport-id="${sport.id}">
+        <span th:text="${sport.name}">Sport Name</span>
+        <span class="sport-nav-badge" th:attr="id='badge-'+${sport.id}">—</span>
+      </button>
+    </th:block>
+
+    <div class="sidebar-footer">
+      <form th:action="@{/admin/logout}" method="post">
+        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+        <button type="submit" class="logout-btn">⏻ Logout</button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="admin-main">
+
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title" id="page-title">All <span>Sports</span></h1>
+        <p class="admin-subtitle" id="page-subtitle">Viewing all registrations across all sports</p>
+      </div>
+      <div>
+        <a href="#" id="export-btn" class="export-btn" onclick="exportCsv(event)">
+          ⬇ Export CSV
+        </a>
+      </div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="summary-card-label">Total Teams</div>
+        <div class="summary-card-value accent" id="count-total">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-label">Approved</div>
+        <div class="summary-card-value green" id="count-approved">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-card-label">Pending Review</div>
+        <div class="summary-card-value accent" id="count-pending">—</div>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <button class="filter-tab active" onclick="applyFilter('ALL', this)">All</button>
+        <button class="filter-tab" onclick="applyFilter('PENDING', this)">Pending</button>
+        <button class="filter-tab" onclick="applyFilter('SUCCESS', this)">Approved</button>
+        <button class="filter-tab" onclick="applyFilter('FAILED', this)">Rejected</button>
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+      <div id="table-container">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading registrations...</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-title" id="confirm-title">Confirm</div>
+    <p class="confirm-body" id="confirm-body">Are you sure?</p>
+    <div class="confirm-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="confirm-ok-btn">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script th:inline="javascript">
+  /*<![CDATA[*/
+  const SPORTS_DATA = /*[[${sports}]]*/ [];
+  /*]]>*/
+</script>
+
+<script src="/js/admin.js"></script>
+</body>
+</html>

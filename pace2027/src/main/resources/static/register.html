@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register Your Team — PACE 2027</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav class="navbar">
+  <a href="/" class="navbar-brand">PACE<span> 2027</span></a>
+  <ul class="nav-links">
+    <li><a href="/#sports">Sports</a></li>
+    <li><a href="register.html">Register</a></li>
+  </ul>
+</nav>
+
+<div class="page-content">
+<div class="form-page">
+
+  <h1 class="form-title">Register<br><span>Your Team</span></h1>
+  <p class="form-subtitle">Fill in your details, pay the fee, and submit your UTR to complete registration.</p>
+
+  <form id="registration-form" novalidate>
+
+    <div class="form-section">
+      <p class="form-section-label">01 — Team &amp; Captain Details</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="sport">Sport *</label>
+          <select id="sport" name="sportId" required>
+            <option value="">— Select a sport —</option>
+          </select>
+          <span class="error-msg" id="sport-error"></span>
+        </div>
+        <div class="form-group">
+          <label for="teamName">Team Name *</label>
+          <input type="text" id="teamName" name="teamName" placeholder="e.g. Thunder Hawks" required>
+          <span class="error-msg" id="teamName-error"></span>
+        </div>
+        <div class="form-group">
+          <label for="captainName">Captain's Full Name *</label>
+          <input type="text" id="captainName" name="captainName" placeholder="Full name" required>
+          <span class="error-msg" id="captainName-error"></span>
+        </div>
+        <div class="form-group">
+          <label for="captainPhone">Captain's Phone *</label>
+          <input type="tel" id="captainPhone" name="captainPhone" placeholder="10-digit mobile number" required>
+          <span class="error-msg" id="captainPhone-error"></span>
+        </div>
+        <div class="form-group full">
+          <label for="captainEmail">Captain's Email *</label>
+          <input type="email" id="captainEmail" name="captainEmail" placeholder="Confirmation will be sent here" required>
+          <span class="error-msg" id="captainEmail-error"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <p class="form-section-label">02 — Team Members</p>
+      <div id="members-list" class="members-list"></div>
+      <button type="button" id="add-member-btn" class="btn btn-outline btn-sm" style="margin-top:14px;">
+        + Add Team Member
+      </button>
+      <span class="error-msg" id="members-error"></span>
+    </div>
+
+    <div class="form-section">
+      <p class="form-section-label">03 — Payment</p>
+
+      <div class="upi-box">
+        <div class="upi-box-content">
+          <h3 class="upi-box-title">Pay Registration Fee</h3>
+          <p class="upi-box-sub" id="fee-display">Select a sport to see the fee</p>
+
+          <div class="qr-container">
+            <!--
+              REPLACE THIS with your actual UPI QR image:
+              <img src="/images/upi-qr.png" alt="UPI QR Code">
+
+              Generate your QR at https://www.upiqrcode.in
+              pointing to UPI ID: pace2027@okaxis
+              Then save image as: src/main/resources/static/images/upi-qr.png
+            -->
+            <img src="/images/upi-qr.png" alt="UPI QR Code">
+          </div>
+
+          <div class="upi-id-box" onclick="copyUpiId(this)" title="Click to copy">
+            <span>📲</span>
+            <span id="upi-id-text">ranjanhimanshu272005@okaxis</span>
+            <span style="color:var(--text-dim); font-size:0.65rem;">CLICK TO COPY</span>
+          </div>
+
+          <div class="upi-steps">
+            <div class="upi-step">
+              <span class="step-num">1</span>
+              <span>Open any UPI app (GPay, PhonePe, Paytm, BHIM)</span>
+            </div>
+            <div class="upi-step">
+              <span class="step-num">2</span>
+              <span>Scan the QR code or send to the UPI ID above</span>
+            </div>
+            <div class="upi-step">
+              <span class="step-num">3</span>
+              <span>After payment, copy the <strong style="color:var(--text-primary);">12-digit UTR / Transaction ID</strong> from your app</span>
+            </div>
+            <div class="upi-step">
+              <span class="step-num">4</span>
+              <span>Paste it in the field below and submit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:20px;">
+        <label for="utrNumber">UTR / Transaction Reference Number *</label>
+        <input type="text" id="utrNumber" name="utrNumber"
+               placeholder="12-digit UTR from your UPI app"
+               maxlength="12" required
+               style="font-family:var(--font-mono); letter-spacing:0.1em;">
+        <span class="error-msg" id="utrNumber-error"></span>
+      </div>
+    </div>
+
+    <div id="form-error"
+         style="display:none; background:rgba(232,64,64,0.1); border:1px solid var(--red);
+                border-radius:var(--radius); padding:14px 18px; color:var(--red);
+                font-family:var(--font-mono); font-size:0.8rem; margin-bottom:20px;">
+    </div>
+
+    <button type="submit" class="btn btn-primary" id="submit-btn"
+            style="width:100%; justify-content:center; font-size:0.85rem; padding:18px;">
+      Submit Registration →
+    </button>
+
+    <p style="margin-top:14px; color:var(--text-muted); font-size:0.85rem; font-style:italic; text-align:center;">
+      Your registration will show as <strong>Pending</strong> until an admin verifies your payment.
+      You'll receive a confirmation email once approved.
+    </p>
+
+  </form>
+</div>
+</div>
+
+<div class="modal-overlay" id="success-modal">
+  <div class="modal">
+    <span class="modal-icon">🎉</span>
+    <h2 class="modal-title">Registered!</h2>
+    <p class="modal-body">
+      Your team has been registered. Payment verification is pending.
+      You'll receive an email at <strong id="modal-email"></strong> once approved.
+    </p>
+    <a href="/" class="btn btn-primary" style="width:100%; justify-content:center;">
+      Back to Homepage
+    </a>
+  </div>
+</div>
+
+<script src="/js/register.js"></script>
+</body>
+</html>
